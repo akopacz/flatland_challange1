@@ -105,6 +105,8 @@ env_renderer = RenderTool(env, gl="PILSVG",
 # Import your own Agent or use RLlib to train agents on Flatland
 from greedy_agent import GreedyAgent
 
+import build_graph as graph_builder
+import networkx as nx
 
 # Initialize the agent with the parameters corresponding to the environment and observation_builder
 controller = GreedyAgent(218, env.action_space[0])
@@ -203,8 +205,28 @@ for info in information['action_required']:
 # We recommend that you monitor the malfunction data and the action required in order to optimize your training
 # and controlling code.
 
-# Let us now look at an episode playing out with random actions performed
 
+# create whitelist, which cells not to remove from graph
+cell_whitelist = set()
+for ag in env.agents:
+    cell_whitelist.update([graph_builder.convert_indexes_2_node(ag.initial_position, env.rail.width), graph_builder.convert_indexes_2_node(ag.target, env.rail.width)])
+
+print("white list:", cell_whitelist)
+
+# Build graph from transition map
+print("\nCompute transition graph from generated rail grid.")
+trs = graph_builder.grid2cells(env.rail)
+g = graph_builder.graph_from_cell_neighbors(trs, env.rail.width, env.rail.height, whitelist=cell_whitelist)
+print(g.number_of_nodes(), g.number_of_edges(), "\n")
+
+astar_paths = []
+# run A* for the agents
+for ag in env.agents:
+    start = graph_builder.convert_indexes_2_node(ag.initial_position, env.rail.width)
+    end = graph_builder.convert_indexes_2_node(ag.target, env.rail.width)
+    astar_paths.append([graph_builder.convert_node_2_indexes(node, env.rail.width) for node in nx.astar_path(g, start, end)])
+
+# Let us now look at an episode playing out with random actions performed
 print("\nStart episode...")
 
 # Reset the rendering system
