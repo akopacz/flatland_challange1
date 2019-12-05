@@ -14,6 +14,7 @@ def transform_indexes(i, j, transition):
     return i + tr[0], j + tr[1]
 
 # env.rail.grid
+
 def grid2cells(rail):
     cell_transitions = []
     for i in range(rail.height):
@@ -27,7 +28,7 @@ def grid2cells(rail):
                 bit = bit << 1
             # for tr in transitions:
                 # pass
-            
+
             # for bit_ind, bit in enumerate(np.binary_repr(grid[i, j])):
             #     if bit == '1':
     return cell_transitions
@@ -35,8 +36,10 @@ def grid2cells(rail):
 def convert_indexes_2_node(inds, width):
     return inds[0]*width + inds[1]
 
+
 def convert_node_2_indexes(node, width):
     return node // width, node % width
+
 
 def graph_from_cell_neighbors(cell_transitions, width, height, whitelist=None):
     if whitelist is None:

@@ -221,6 +221,7 @@ print(g.number_of_nodes(), g.number_of_edges(), "\n")
 
 astar_paths = []
 # run A* for the agents
+# LCs: is this correct???
 for ag in env.agents:
     start = graph_builder.convert_indexes_2_node(ag.initial_position, env.rail.width)
     end = graph_builder.convert_indexes_2_node(ag.target, env.rail.width)
