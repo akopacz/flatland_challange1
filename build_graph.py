@@ -16,8 +16,6 @@ def transform_indexes(i, j, transition):
     tr = transform_dict[transition % 4]
     return i + tr[0], j + tr[1]
 
-FROM_WEST_TO_SOUTH = 3
-
 def grid2cells(rail):
     # param: env.rail.grid
     cell_transitions = []
@@ -48,8 +46,10 @@ def convert_bit_ind_2_dir(bit_index):
 def convert_indexes_2_node(inds, width):
     return inds[0]*width + inds[1]
 
+
 def convert_node_2_indexes(node, width):
     return node // width, node % width
+
 
 def graph_from_cell_neighbors(cell_transitions, width, height, whitelist=None):
     if whitelist is None:
