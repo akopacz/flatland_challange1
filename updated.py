@@ -220,11 +220,13 @@ g = graph_builder.graph_from_cell_neighbors(trs, env.rail.width, env.rail.height
 print(g.number_of_nodes(), g.number_of_edges(), "\n")
 
 astar_paths = []
+astar_paths_readable = []
 # run A* for the agents
 for ag in env.agents:
     start = graph_builder.convert_indexes_2_node(ag.initial_position, env.rail.width)
     end = graph_builder.convert_indexes_2_node(ag.target, env.rail.width)
-    astar_paths.append([graph_builder.convert_node_2_indexes(node, env.rail.width) for node in nx.astar_path(g, start, end)])
+    astar_paths.append(nx.astar_path(g, start, end))
+    astar_paths_readable.append([graph_builder.convert_node_2_indexes(node, env.rail.width) for node in astar_paths[-1]])
 
 # Let us now look at an episode playing out with random actions performed
 print("\nStart episode...")
@@ -240,6 +242,8 @@ score = 0
 # Run episode
 frame_step = 0
 
+agent_left_node = 0
+
 for step in range(100): # range(500):
     # Chose an action for each agent in the environment
     for a_id, ag in enumerate(env.agents):
@@ -250,10 +254,22 @@ for step in range(100): # range(500):
             # builtin a* for the node
             try:
                 if ag.position is not None:
-                    path = fl_astar.a_star(env.distance_map.rail, ag.position, ag.target)
-                    print()
-                    action = controller.simple_act(path[0], ag.direction, path[1])
-                    print(f"{a_id} {path[:-1]} {ag.target}:      {ag.direction} {path[:2]} {action}")
+                    # path = fl_astar.a_star(env.distance_map.rail, ag.position, ag.target)
+                    # print()
+                    # action = controller.simple_act(path[0], ag.direction, path[1])
+                    # print(f"{a_id} {path[:-1]} {ag.target}:      {ag.direction} {path[:2]} {action}")
+                    if ag.position == astar_paths_readable[a_id][agent_left_node]:
+                        # arrived at a (graph node) possible intersection
+                        agent_left_node += 1
+                        next = astar_paths[a_id][agent_left_node]
+                        # decide which way to go next
+                        from_ = astar_paths[a_id][agent_left_node-1]
+                        dirs = g[from_][next]
+                        if dirs["dir0"] == ag.direction:
+                            action = controller.change_dir_from_to(dirs["dir0"], dirs["dir1"])
+                        else:
+                            action = controller.change_dir_from_to(dirs["dir1"], dirs["dir0"])
+
                     # action = controller.act(observations[a_id])
                     action_dict.update({a_id: action})
                 else:

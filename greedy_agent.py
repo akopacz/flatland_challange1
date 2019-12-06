@@ -37,6 +37,14 @@ class GreedyAgent:
         else:
             return 4
 
+    def change_dir_from_to(self, from_dir, to_dir):
+        turn = from_dir - to_dir
+        if turn > 1:
+            turn -= 4
+        elif turn < -1:
+            turn += 4
+        return 2 + turn
+
     def step(self, memories):
         """
         Step function to improve agent by adjusting policy given the observations
