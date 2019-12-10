@@ -13,7 +13,7 @@ from flatland.envs.schedule_generators import sparse_schedule_generator
 # We also include a renderer because we want to visualize what is going on in the environment
 from flatland.utils.rendertools import RenderTool, AgentRenderVariant
 
-import flatland.core.grid.grid4_astar as fl_astar
+from flatland.envs.agent_utils import RailAgentStatus
 
 # This is an introduction example for the Flatland 2.1.* version.
 # Changes and highlights of this version include
@@ -105,7 +105,7 @@ env_renderer = RenderTool(env, gl="PILSVG",
 # Import your own Agent or use RLlib to train agents on Flatland
 from greedy_agent import GreedyAgent
 
-import build_graph as graph_builder
+from build_graph import GraphBuilder
 import networkx as nx
 
 # Initialize the agent with the parameters corresponding to the environment and observation_builder
@@ -206,28 +206,37 @@ for info in information['action_required']:
 # and controlling code.
 
 
+####################################################
+# Build graph from transition map
+print("\nCompute transition graph from generated rail grid.")
+graph_generator = GraphBuilder(env.rail.width, env.rail.height, env.rail.grid)
+
 # create whitelist, which cells not to remove from graph
 cell_whitelist = set()
 for ag in env.agents:
-    cell_whitelist.update([graph_builder.convert_indexes_2_node(ag.initial_position, env.rail.width), graph_builder.convert_indexes_2_node(ag.target, env.rail.width)])
+    start = graph_generator.convert_indexes_2_node(ag.initial_position, )
+    if ag.position is not None:
+        start = graph_generator.convert_indexes_2_node(ag.position)
+    cell_whitelist.update([start, graph_generator.convert_indexes_2_node(ag.target)])
 
 print("white list:", cell_whitelist)
 
-# Build graph from transition map
-print("\nCompute transition graph from generated rail grid.")
-trs = graph_builder.grid2cells(env.rail)
-g = graph_builder.graph_from_cell_neighbors(trs, env.rail.width, env.rail.height, whitelist=cell_whitelist)
+g = graph_generator.graph_from_cell_neighbors(whitelist=cell_whitelist)
 print(g.number_of_nodes(), g.number_of_edges(), "\n")
 
+
+# Determine optimal path for each agent with a*
 astar_paths = []
 astar_paths_readable = []
 # run A* for the agents
 # LCs: is this correct???
 for ag in env.agents:
-    start = graph_builder.convert_indexes_2_node(ag.initial_position, env.rail.width)
-    end = graph_builder.convert_indexes_2_node(ag.target, env.rail.width)
+    start = graph_generator.convert_indexes_2_node(ag.initial_position)
+    if ag.position is not None:
+        start = graph_generator.convert_indexes_2_node(ag.position)
+    end = graph_generator.convert_indexes_2_node(ag.target)
     astar_paths.append(nx.astar_path(g, start, end))
-    astar_paths_readable.append([graph_builder.convert_node_2_indexes(node, env.rail.width) for node in astar_paths[-1]])
+    astar_paths_readable.append([graph_generator.convert_node_2_indexes(node) for node in astar_paths[-1]])
 
 # Let us now look at an episode playing out with random actions performed
 print("\nStart episode...")
@@ -243,44 +252,37 @@ score = 0
 # Run episode
 frame_step = 0
 
-agent_left_node = 0
+agent_left_node = np.ones(len(env.agents), dtype=int)
+# check if agents are already departed
+# for a_id, ag in enumerate(env.agents):
+#     pass
 
 for step in range(100): # range(500):
     # Chose an action for each agent in the environment
     for a_id, ag in enumerate(env.agents):
-        if a_id == 0:
-            if ag.position == ag.target:
-                print("YAAAAY")
-                action_dict.update({a_id: 0})
-            # builtin a* for the node
-            try:
-                if ag.position is not None:
-                    # path = fl_astar.a_star(env.distance_map.rail, ag.position, ag.target)
-                    # print()
-                    # action = controller.simple_act(path[0], ag.direction, path[1])
-                    # print(f"{a_id} {path[:-1]} {ag.target}:      {ag.direction} {path[:2]} {action}")
-                    if ag.position == astar_paths_readable[a_id][agent_left_node]:
-                        # arrived at a (graph node) possible intersection
-                        agent_left_node += 1
-                        next = astar_paths[a_id][agent_left_node]
-                        # decide which way to go next
-                        from_ = astar_paths[a_id][agent_left_node-1]
-                        dirs = g[from_][next]
-                        if dirs["dir0"] == ag.direction:
-                            action = controller.change_dir_from_to(dirs["dir0"], dirs["dir1"])
-                        else:
-                            action = controller.change_dir_from_to(dirs["dir1"], dirs["dir0"])
-
-                    # action = controller.act(observations[a_id])
-                    action_dict.update({a_id: action})
+        if ag.status == RailAgentStatus.ACTIVE:
+            # follow path defined by a*
+            if ag.position == astar_paths_readable[a_id][agent_left_node[a_id]]:
+                # arrived at a (graph node) possible intersection
+                agent_left_node[a_id] += 1
+                next_node = astar_paths[a_id][agent_left_node[a_id]]
+                # decide which way to go next
+                from_ = astar_paths[a_id][agent_left_node[a_id]-1]
+                dirs = g[from_][next_node]
+                if dirs["dir0"] == ag.direction:
+                    action = controller.change_dir_from_to(dirs["dir0"], dirs["dir1"])
+                    print(f"Agent {a_id} changed its direction from {ag.direction} to {dirs['dir1']}")
                 else:
-                    print(f"Agent {a_id} position is None... maybe place on the map??")
-            except Exception:
-                print(f"Error occured while running a* algorithm for agent {a_id}")
-            # action = controller.act(observations[a_id])
-        else:
-            # stop moving
-            action_dict.update({a_id: 4})
+                    action = controller.change_dir_from_to(dirs["dir1"], dirs["dir0"])
+                    print(f"Agent {a_id} changed its direction from {ag.direction} to {dirs['dir0']}")
+            else:
+                # go forward... or check where should go
+                action = 2
+
+            action_dict.update({a_id: action})
+        elif ag.status == RailAgentStatus.READY_TO_DEPART:
+            # initializing with a going forward movement
+            action_dict.update({a_id: 2})
 
     # Environment step which returns the observations for all agents, their corresponding
     # reward and whether their are done
@@ -288,7 +290,7 @@ for step in range(100): # range(500):
     next_obs, all_rewards, done, _ = env.step(action_dict)
 
     env_renderer.render_env(show=True, show_observations=False, show_predictions=False)
-    env_renderer.gl.save_image('./misc/Fames2/flatland_frame_{:04d}.png'.format(step))
+    env_renderer.gl.save_image('../misc/Fames2/flatland_frame_{:04d}.png'.format(step))
     frame_step += 1
     # Update replay buffer and train agent
     for a in range(env.get_num_agents()):
