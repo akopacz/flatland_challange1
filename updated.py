@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 # In Flatland you can use custom observation builders and predicitors
 # Observation builders generate the observation needed by the controller
@@ -96,6 +97,9 @@ env_renderer = RenderTool(env, gl="PILSVG",
                           screen_height=1200,  # Adjust these parameters to fit your resolution
                           screen_width=1800)  # Adjust these parameters to fit your resolution
 
+# save env object to file
+with open("env_object.dat", 'wb') as f:
+    pickle.dump((env.rail), f)
 
 # The first thing we notice is that some agents don't have feasible paths to their target.
 # We first look at the map we have created
@@ -253,13 +257,13 @@ score = 0
 frame_step = 0
 
 agent_left_node = np.ones(len(env.agents), dtype=int)
-# check if agents are already departed
-# for a_id, ag in enumerate(env.agents):
-#     pass
+
+agent_actions = {i:[] for i in range(env.get_num_agents())}
 
 for step in range(100): # range(500):
     # Chose an action for each agent in the environment
     for a_id, ag in enumerate(env.agents):
+        action = None
         if ag.status == RailAgentStatus.ACTIVE:
             # follow path defined by a*
             if ag.position == astar_paths_readable[a_id][agent_left_node[a_id]]:
@@ -278,11 +282,13 @@ for step in range(100): # range(500):
             else:
                 # go forward... or check where should go
                 action = 2
-
-            action_dict.update({a_id: action})
+            
         elif ag.status == RailAgentStatus.READY_TO_DEPART:
             # initializing with a going forward movement
-            action_dict.update({a_id: 2})
+            action = 2
+        if action is not None:
+            action_dict.update({a_id: action})
+            agent_actions[a_id].append(action)
 
     # Environment step which returns the observations for all agents, their corresponding
     # reward and whether their are done
@@ -301,3 +307,10 @@ for step in range(100): # range(500):
     if done['__all__']:
         break
     print('Episode: Steps {}\t Score = {}'.format(step, score))
+
+
+with open("env_object.dat", 'rb') as f:
+    starting_rail_env = pickle.load(f)
+
+with open("env_object.dat", 'wb') as f:
+    pickle.dump((starting_rail_env, agent_actions), f)
