@@ -1,0 +1,125 @@
+\documentclass{beamer}
+%
+
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\mode<presentation>
+{
+  \usetheme{Singapore}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{crane} % or try albatross, beaver, crane, seahorse ...
+  \usefonttheme{professionalfonts}  % or try serif, structurebold, ...
+  \setbeamertemplate{blocks}[rounded]%[shadow=true]
+  \useinnertheme[shadow=true]{rounded}
+%  \setbeamertemplate{navigation symbols}{}
+%  \setbeamertemplate{caption}[numbered]
+%  \setbeamertemplate{itemize item}{\color{black}$\bullet$}
+} 
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amssymb,amsmath,relsize}
+\usepackage{algpseudocode}
+\usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning,math,calc}
+
+% TIKZ TIKZ commands
+\tikzset{onslide/.code args={<#1>#2}{%
+  \only<#1>{\pgfkeysalso{#2}} 
+}} %% ! nice
+% works as follows:  \node [onslide={<2,4>{green}}] (am) [right=of fe.center] {Acoustic Model};
+
+
+%% left-out parts
+%%\usepackage[export]{adjustbox}
+%%\usepackage{media9}
+
+%%\AtBeginSection[]
+%%{
+%%  \begin{frame}<beamer>
+%%    \frametitle{Outline}
+%%    \tableofcontents[currentsection,currentsubsection]
+%%  \end{frame}
+%%}
+
+%%\newcommand\norm[1]{\left\lVert#1\right\rVert}
+%%\SetKw{Break}{break}
+
+\title[Flatland]{
+	\large Ideas for Flatland\\
+	~\\
+	\small Suggestion  for representation
+}
+
+\author{
+Lehel CSATÓ}
+\institute[UBB]{\relsize{1}
+  Faculty of Mathematics and Informatics \newline
+  Babe\c{s}--Bolyai University of Cluj-Napoca
+}
+
+\begin{document}
+
+\frame{\maketitle}
+
+%\begin{frame}
+%  \titlepage
+%\end{frame}
+
+\begin{frame}[t]{Agent actions}
+
+
+\begin{itemize}
+\item If alone, then the $A^*$ algorithm is optimal.
+\vfill
+\vfill
+\item If multiple agents on track, then:
+\vfill
+  \begin{enumerate}
+  \item One must label the \alert{map}: track portions locked by the agents present within the system.
+\vfill
+  \item Calculate -- on the $A^*$ algorithm on the labelled graph -- the shortest times to destination.
+\vfill
+  \item Prioritize the agents -- suggested prioritization criterion is the \alert{expected shortest arrival} to the destination.
+  \end{enumerate}
+
+\end{itemize}
+
+\vfill
+
+\hfill \beamergotobutton{\relsize{2}Details of each step}
+\vspace*{-0cm}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Labelling the map}
+
+% PGF and latex cannot work with multiple images within a GIF.
+% solution is to:
+%   1. serialise using the command: 
+%         convert -coalesce flatland1.gif fl1.png
+%   2. choose the resulting PNG (or more) to include in latex
+%
+\begin{tikzpicture}[remember picture,overlay,onslide={<2->{nearly transparent}}]%
+  \node (fl_im) [below=1.5cm of current page.north]%
+  { \pgfimage[width=\linewidth]{images/fl1-1}
+  };%
+  \node (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ ) {.};
+  \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$ ) {.};
+\end{tikzpicture}
+
+\only<2->{
+\begin{tikzpicture}[remember picture,overlay,>=latex]%
+  \node (concl) [xshift=-2cm,below right=2.5cm of current page.north,fill=white, fill opacity=.5,text opacity=1]%
+  { some text
+  };%
+ \draw[->,very thick] (concl.west)[->] -- (point_at_1.center) (concl.west) -- (point_at_2.center);
+\end{tikzpicture}
+}
+
+\end{frame}
+
+\end{document}
