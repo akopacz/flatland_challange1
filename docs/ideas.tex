@@ -103,20 +103,52 @@ Lehel CSATÓ}
 %         convert -coalesce flatland1.gif fl1.png
 %   2. choose the resulting PNG (or more) to include in latex
 %
-\begin{tikzpicture}[remember picture,overlay,onslide={<2->{nearly transparent}}]%
-  \node (fl_im) [below=1.5cm of current page.north]%
+\begin{tikzpicture}[remember picture,overlay,onslide={<2->{semitransparent}}]%
+  \node (fl_im) [below=2.5cm of current page.north]%
   { \pgfimage[width=\linewidth]{images/fl1-1}
   };%
-  \node (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ ) {.};
+  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ );
   \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$ ) {.};
 \end{tikzpicture}
 
 \only<2->{
 \begin{tikzpicture}[remember picture,overlay,>=latex]%
-  \node (concl) [xshift=-2cm,below right=2.5cm of current page.north,fill=white, fill opacity=.5,text opacity=1]%
-  { some text
+  \node (concl)
+    [ scale=.625,text opacity=1,rounded corners,inner sep =8pt,%
+      xshift=-2cm,
+      below right=2.5cm of current page.north,
+      fill=title.bg!60!white,
+      fill opacity=.5]%
+  { \begin{minipage}{.75\linewidth}
+    \textbf{Conflicts}\\
+     When the agent is \emph{expected to reach} that position, it could be at a conflicting state.
+    \vspace*{.3cm}
+    \begin{alertblock}{Resolution}
+      The $A^*$ algorithm will output a modified graph that includes times when a node
+      \alert{\bfseries is not available}.\\
+      \vspace*{.2cm}
+      This availability depends on \alert{\bfseries node ordering}.
+    \end{alertblock}
+    \vspace*{.3cm}
+    \visible<3->{
+    \begin{alertblock}{A suggestion therefore is to:}
+    \begin{enumerate}
+    \item Let the system \alert{know} the order that a given agent was given;
+    \item To have a few \alert{priority classes} only: suggestion is to have:
+      \begin{description}
+      \item[First] --  first (a single agent);
+      \item[Runners up] -- the next $25\%$ of agents;
+      \item[Last ones] -- the rest -- $\approx 75\%$ -- of it.
+      \end{description}
+    \end{enumerate}
+    \end{alertblock}
+    }
+    \end{minipage}
   };%
- \draw[->,very thick] (concl.west)[->] -- (point_at_1.center) (concl.west) -- (point_at_2.center);
+  \begin{scope}[blue,line width=2pt]
+    \draw (concl.west)[->] -- (point_at_1.center);
+    \draw (concl.west)[->] -- (point_at_2.center);
+  \end{scope}
 \end{tikzpicture}
 }
 
