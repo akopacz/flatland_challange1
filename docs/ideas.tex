@@ -79,9 +79,13 @@ Lehel CSATÓ}
 \item If multiple agents on track, then:
 \vfill
   \begin{enumerate}
-  \item One must label the \alert{map}: track portions locked by the agents present within the system.
+  \item One must label the \alert{map}: 
+    \begin{itemize}
+    \item Identify portions locked by the agents present within the system;
+    \item Identify \emph{likelihood} of a cell being occupied at a given time -- relative to \emph{present}.
+    \end{itemize}
 \vfill
-  \item Calculate -- on the $A^*$ algorithm on the labelled graph -- the shortest times to destination.
+  \item Calculate -- using graph search in a labelled graph -- the shortest times to destination.
 \vfill
   \item Prioritize the agents -- suggested prioritization criterion is the \alert{expected shortest arrival} to the destination.
   \end{enumerate}
@@ -95,7 +99,7 @@ Lehel CSATÓ}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Labelling the map}
+  \frametitle{Labelling the map \quad I}
 
 % PGF and latex cannot work with multiple images within a GIF.
 % solution is to:
@@ -104,6 +108,61 @@ Lehel CSATÓ}
 %   2. choose the resulting PNG (or more) to include in latex
 %
 \begin{tikzpicture}[remember picture,overlay,onslide={<2->{semitransparent}}]%
+  \node (fl_im) [below=2cm of current page.north]%
+  { \pgfimage[width=\linewidth]{images/fl1-5_annotated}
+  };%
+  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ );
+  \coordinate (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$);
+\end{tikzpicture}
+
+\only<2->{
+\begin{tikzpicture}[remember picture,overlay,>=latex]%
+  \node (concl)
+    [ scale=.625,text opacity=1,rounded corners,inner sep=8pt,%
+      xshift=-3cm,
+      below right=2.5cm of current page.north,
+      fill=title.bg!60!white,
+      fill opacity=.4]%
+  { \begin{minipage}{.85\linewidth}
+    \textbf{Facts:}\\
+     Given the current position for each agent, there are locations that \alert{will cause deadlock} if occupied by an other agent.
+    \vspace*{.3cm}
+    \begin{alertblock}{Resolution}
+      Labelling the nodes as \alert{busy for -- at least -- time $t$}.\\
+      \vspace*{.2cm}
+      This labelling:
+        \begin{itemize}
+        \item is \alert{independent} of agent actions,
+        \item can be computed in fixed time,
+        \item can be included in the $A^*$ algorithm. \hfill \visible<3->{{\relsize{1}\bfseries Can it?}}
+        \end{itemize}
+    \end{alertblock}
+    \vspace*{1cm}
+    \visible<3->{%
+      \textbf{Note:}\\
+      Instead of $A^*$, one might use other graph search algorithms.
+    }
+    \end{minipage}
+  };%
+  \begin{scope}[blue,line width=2pt,bend right]
+    \draw (concl.north west)[->] to (point_at_1.center);
+    \draw (concl.north west)[->] to (point_at_2.center);
+  \end{scope}
+\end{tikzpicture}
+}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Labelling the map \quad II}
+
+% PGF and latex cannot work with multiple images within a GIF.
+% solution is to:
+%   1. serialise using the command: 
+%         convert -coalesce flatland1.gif fl1.png
+%   2. choose the resulting PNG (or more) to include in latex
+%
+% if one wishes to change a TIKZ attribute: onslide={<2->{semitransparent}}
+\begin{tikzpicture}[remember picture,overlay,semitransparent]%
   \node (fl_im) [below=2.5cm of current page.north]%
   { \pgfimage[width=\linewidth]{images/fl1-1}
   };%
@@ -111,30 +170,30 @@ Lehel CSATÓ}
   \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$ ) {.};
 \end{tikzpicture}
 
-\only<2->{
 \begin{tikzpicture}[remember picture,overlay,>=latex]%
   \node (concl)
     [ scale=.625,text opacity=1,rounded corners,inner sep =8pt,%
-      xshift=-2cm,
+      xshift=-3cm,
       below right=2.5cm of current page.north,
       fill=title.bg!60!white,
-      fill opacity=.5]%
-  { \begin{minipage}{.75\linewidth}
-    \textbf{Conflicts}\\
-     When the agent is \emph{expected to reach} that position, it could be at a conflicting state.
-    \vspace*{.3cm}
+      fill opacity=.4]%
+  { \begin{minipage}{.85\linewidth}
+    \textbf{Several agents using the same network:}\\
+     When the agent is \emph{expected to reach} that position, it could be at a conflicting state with other agents.
+    \vspace*{.5cm}
     \begin{alertblock}{Resolution}
-      The $A^*$ algorithm will output a modified graph that includes times when a node
+      The graph search algorithm must run on the modified graph that includes times when a node
       \alert{\bfseries is not available}.\\
-      \vspace*{.2cm}
+      \vspace*{.25cm}
       This availability depends on \alert{\bfseries node ordering}.
     \end{alertblock}
     \vspace*{.3cm}
-    \visible<3->{
+    \visible<2->{
     \begin{alertblock}{A suggestion therefore is to:}
     \begin{enumerate}
     \item Let the system \alert{know} the order that a given agent was given;
-    \item To have a few \alert{priority classes} only: suggestion is to have:
+    \vspace*{.3cm}
+    \item \alert{\bfseries Simplification:} few \emph{priority classes} only:
       \begin{description}
       \item[First] --  first (a single agent);
       \item[Runners up] -- the next $25\%$ of agents;
@@ -150,7 +209,6 @@ Lehel CSATÓ}
     \draw (concl.west)[->] -- (point_at_2.center);
   \end{scope}
 \end{tikzpicture}
-}
 
 \end{frame}
 
