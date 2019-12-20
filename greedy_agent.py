@@ -18,27 +18,28 @@ class GreedyAgent:
     def simple_act(self, p0, dir, p1):
         diff_0 = p1[0] - p0[0]
         diff_1 = p1[1] - p0[1]
-        diff = 0
+        new_dir = 0
         if diff_0 < 0:
             # North
-            diff = 0
+            new_dir = 0
         if diff_0 > 0:
             # SOUTH
-            diff = 2
+            new_dir = 2
         if diff_1 > 0:
             # EAST
-            diff = 1
+            new_dir = 1
         if diff_1 < 0:
             # West
-            diff = 3
+            new_dir = 3
         # return action % 4
-        if abs(diff - dir) < 2:
-            return 2 + diff - dir
-        else:
-            return 4
+        # if abs(diff - dir) < 2:
+        #     return 2 + diff - dir
+        # else:
+        #     return 4
+        return self.change_dir_from_to(dir, new_dir)
 
     def change_dir_from_to(self, from_dir, to_dir):
-        turn = from_dir - to_dir
+        turn = to_dir - from_dir
         if turn > 1:
             turn -= 4
         elif turn < -1:
