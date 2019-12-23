@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169,12pt]{beamer}
 %
 
 % Choose how your presentation looks.
@@ -22,7 +22,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{amssymb,amsmath,relsize}
 \usepackage{algpseudocode}
-\usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
+%\usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
 \usepackage{tikz}
 \usetikzlibrary{shapes,positioning,math,calc}
 
@@ -54,11 +54,12 @@
 	\small Suggestion  for representation
 }
 
-\author{
-Lehel CSATÓ}
-\institute[UBB]{\relsize{1}
-  Faculty of Mathematics and Informatics \newline
-  Babe\c{s}--Bolyai University of Cluj-Napoca
+\author{Lehel CSATÓ$^1$ \and Hunor JAKAB$^{2,3}$ \and Levent KENT$^3$ \and Gyula SZABÓ$^2$}
+\institute[UBB]{%\relsize{-1}
+  $^1$Faculty of Mathematics and Informatics, 
+  Babe\c{s}--Bolyai University of Cluj-Napoca  \\
+  $^2$Accenture Romania \\
+  $^3$Accenture Switzerland \\
 }
 
 \begin{document}
@@ -81,8 +82,8 @@ Lehel CSATÓ}
   \begin{enumerate}
   \item One must label the \alert{map}: 
     \begin{itemize}
-    \item Identify portions locked by the agents present within the system;
-    \item Identify \emph{likelihood} of a cell being occupied at a given time -- relative to \emph{present}.
+    \item Identify regions locked by agents;
+    \item (if needed) identify \emph{likelihood} of cells being occupied at a future time.
     \end{itemize}
 \vfill
   \item Calculate -- using graph search in a labelled graph -- the shortest times to destination.
@@ -108,11 +109,11 @@ Lehel CSATÓ}
 %   2. choose the resulting PNG (or more) to include in latex
 %
 \begin{tikzpicture}[remember picture,overlay,onslide={<2->{semitransparent}}]%
-  \node (fl_im) [below=2cm of current page.north]%
+  \node (fl_im) [below=1.5cm of current page.north]%
   { \pgfimage[width=\linewidth]{images/fl1-5_annotated}
   };%
-  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ );
-  \coordinate (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$);
+  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,1.1cm)$ );
+  \coordinate (point_at_2) at ( $(fl_im.center) + (-1.9cm,-2.5cm)$);
 \end{tikzpicture}
 
 \only<2->{
@@ -139,14 +140,15 @@ Lehel CSATÓ}
     \end{alertblock}
     \vspace*{1cm}
     \visible<3->{%
-      \textbf{Note:}\\
-      Instead of $A^*$, one might use other graph search algorithms.
+      \begin{block}{Note:}
+      Instead of $A^*$ we could use other graph search methods.
+      \end{block}
     }
     \end{minipage}
   };%
   \begin{scope}[blue,line width=2pt,bend right]
-    \draw (concl.north west)[->] to (point_at_1.center);
-    \draw (concl.north west)[->] to (point_at_2.center);
+    \draw (concl.west)[->] to (point_at_1.center);
+    \draw (concl.west)[->] to (point_at_2.center);
   \end{scope}
 \end{tikzpicture}
 }
@@ -163,11 +165,11 @@ Lehel CSATÓ}
 %
 % if one wishes to change a TIKZ attribute: onslide={<2->{semitransparent}}
 \begin{tikzpicture}[remember picture,overlay,semitransparent]%
-  \node (fl_im) [below=2.5cm of current page.north]%
+  \node (fl_im) [below=1.5cm of current page.north]%
   { \pgfimage[width=\linewidth]{images/fl1-1}
   };%
-  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ );
-  \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$ ) {.};
+  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,1.1cm)$ );
+  \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-2.5cm)$ ) {.};
 \end{tikzpicture}
 
 \begin{tikzpicture}[remember picture,overlay,>=latex]%
@@ -211,5 +213,47 @@ Lehel CSATÓ}
 \end{tikzpicture}
 
 \end{frame}
+
+\begin{frame}{Shortest path calculation}
+
+\begin{enumerate}
+\item If alone, then the $A^*$ algorithm is optimal;
+\vfill
+\item If multiple agents are present, a solution is to:
+  \begin{itemize}
+  \item estimate the arrival times -- disregarding \alert{other agent positions}.\\
+  \hfill These estimates take into account labelling (blocked positions);\\
+  \hfill Sugg: if route blocked -- e.g. within $2$ steps -- then $t=\infty$.\\
+  \hfill Will serve for agent ordering.
+  \end{itemize}
+\vfill
+\item If an agent cannot move -- i.e. it is broken -- then $t=\infty$.
+\end{enumerate}
+
+\vfill
+\vfill
+
+\begin{block}{No obstruction rule}
+  None of the agents can step onto a position that is labelled as conflicting.
+\end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]{Algorithm}
+
+The suggested algorithm is therefore:
+
+\begin{algorithmic}[1]
+\While{$\mathrm{AgentList} \not= \emptyset$}
+\State Label the map using the actual state
+\State Compute shortest path and make the order
+\State Perform the moves using the order of agents
+\State* \qquad\qquad {\relsize{-1} Avoid stepping on forbidden states}
+\EndWhile
+\end{algorithmic}
+
+\end{frame}
+
+
 
 \end{document}
