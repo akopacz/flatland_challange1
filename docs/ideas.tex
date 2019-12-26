@@ -1,5 +1,5 @@
-\documentclass[aspectratio=169,12pt]{beamer}
-%
+\documentclass[12pt,aspectratio=169]{beamer}
+% 
 
 % Choose how your presentation looks.
 %
@@ -54,23 +54,31 @@
 	\small Suggestion  for representation
 }
 
-\author{Lehel CSATÓ$^1$ \and Hunor JAKAB$^{2,3}$ \and Levent KENT$^3$ \and Gyula SZABÓ$^2$}
+\author{Lehel Csató}
 \institute[UBB]{%\relsize{-1}
-  $^1$Faculty of Mathematics and Informatics, 
-  Babe\c{s}--Bolyai University of Cluj-Napoca  \\
-  $^2$Accenture Romania \\
-  $^3$Accenture Switzerland \\
+  Faculty of Mathematics and Informatics,\\
+  Babe\c{s}--Bolyai University of Cluj-Napoca
 }
+
 
 \begin{document}
 
-\frame{\maketitle}
+\frame{\maketitle\vspace*{-3.5cm}\hfill\begin{minipage}{.35\linewidth}%\relsize{-1}
+  \raggedleft
+  Discussions with:\\
+  ~\\
+  Hunor Jakab\\
+  Levent Kent\\ 
+  Anikó Kopacz\\ 
+  Gyula Szabó
+\end{minipage}\hspace*{-.5cm}}
 
 %\begin{frame}
 %  \titlepage
 %\end{frame}
 
-\begin{frame}[t]{Agent actions}
+\begin{frame}[t]
+  \frametitle{Agent actions}
 
 
 \begin{itemize}
@@ -86,9 +94,9 @@
     \item (if needed) identify \emph{likelihood} of cells being occupied at a future time.
     \end{itemize}
 \vfill
-  \item Calculate -- using graph search in a labelled graph -- the shortest times to destination.
+  \item Calculate the shortest times to destination on the \alert{labelled grid}.
 \vfill
-  \item Prioritize the agents -- suggested prioritization criterion is the \alert{expected shortest arrival} to the destination.
+  \item Prioritize the agents according to the \alert{expected arrival to destination}.
   \end{enumerate}
 
 \end{itemize}
@@ -99,7 +107,7 @@
 \vspace*{-0cm}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[t]
   \frametitle{Labelling the map \quad I}
 
 % PGF and latex cannot work with multiple images within a GIF.
@@ -154,7 +162,7 @@
 }
 \end{frame}
 
-\begin{frame}
+\begin{frame}[t]
   \frametitle{Labelling the map \quad II}
 
 % PGF and latex cannot work with multiple images within a GIF.
@@ -214,7 +222,8 @@
 
 \end{frame}
 
-\begin{frame}{Shortest path calculation}
+\begin{frame}[t]
+  \frametitle{Shortest path calculation}
 
 \begin{enumerate}
 \item If alone, then the $A^*$ algorithm is optimal;
@@ -239,21 +248,134 @@
 
 \end{frame}
 
-\begin{frame}[fragile]{Algorithm}
+\begin{frame}[fragile,t]
+  \frametitle{Algorithm}
 
-The suggested algorithm is therefore:
-
-\begin{algorithmic}[1]
-\While{$\mathrm{AgentList} \not= \emptyset$}
-\State Label the map using the actual state
-\State Compute shortest path and make the order
-\State Perform the moves using the order of agents
-\State* \qquad\qquad {\relsize{-1} Avoid stepping on forbidden states}
-\EndWhile
-\end{algorithmic}
+\hfill
+\begin{minipage}{.8\linewidth}
+  \begin{alertblock}{Multiagent control algorithm}
+  \begin{algorithmic}[1]
+  \Statex
+  \While{$\mathrm{AgentList} \not= \emptyset$}
+  \State Label the map using the actual problem state
+  \Statex \Comment {{\relsize{-1} One must consider the \alert{grid} and the \alert{agent positions}}}
+  \State Compute shortest path and establish the order of agents
+  \Statex
+  \State Perform the moves using the order of agents
+  \Statex
+  \Comment {{\relsize{-1} Perform moves according to the established order}}
+  \Statex
+  \Comment {{\relsize{-1} Avoid stepping on forbidden states}}
+  \State {\relsize{-1}\bfseries If agent at destination, remove it from list}
+  \EndWhile
+  \end{algorithmic}
+  \end{alertblock}
+\end{minipage}
 
 \end{frame}
 
+\begin{frame}[t]
+  \frametitle{Conclusions arising from the controlling algorithm}
 
+  \vspace*{-.4cm}\hfill
+  \begin{minipage}{.4\linewidth}
+  \begin{block}{Goal is to \alert{avoid deadlocks}}
+  \end{block}
+  \end{minipage}
+
+  \vfill
+  \textbf{Any agent:}
+  \begin{itemize}
+  \item \alert{Should move} if it \alert{\bfseries can} -- i.e. it is not broken or lead to possible conflict;
+  \vfill
+  \item \alert{If it moves}, then the observation map \alert{is updated};
+  \end{itemize}
+  
+  \vfill
+  \vfill
+
+\textbf{Conclusions regarding action space:}
+
+\begin{itemize}
+  \vfill
+  \item No need to decide for agent movement: if permitted, it \alert{always} moves.
+  \vfill
+  \item The movement is always \alert{along the scheduled path}.
+  \vfill
+  \item Decision required as to the path needs updating or not.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle{Conclusion regarding agent/state representation}
+
+\textbf{Problem representation:}
+\begin{itemize}
+\item There is a \alert{scheduler} -- from which the agents get their route plan.
+\item Each agent -- if it can -- moves.
+  Therefore, each movement is affected by
+  \begin{itemize}
+  \item the \alert{global ordering} of each agent;
+  \item the established schedule -- timetable.
+  \end{itemize}
+\end{itemize}
+
+\vfill
+\begin{alertblock}{Places for problem adaptation:}
+  \alert{ANN-s needed} to adaptively:
+  \begin{itemize}
+  \item Decide time and circumstances \alert{of re-scheduling} an agent;
+  \item Propose \alert{alternative routes} -- how to \alert{modify the grid}.
+  \end{itemize}
+\end{alertblock}
+
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Frame for an adaptive algorithm}
+
+{\relsize{-1}
+\begin{columns}
+
+\column[t]{.67\linewidth}
+\vspace*{-0cm}
+\begin{minipage}{\linewidth}
+  \begin{alertblock}{Multiagent adaptive control}
+  \begin{algorithmic}[1]
+  \State Compute shortest paths for \alert{all agents};
+  %  \Statex
+  \While{$\mathrm{AgentList} \not= \emptyset$}
+  \State Label the map by propagating agent movements;
+  \State Establish agent ordering;
+  \For {each agent in succession order}
+  \State Perform the move if not in conflict;
+  \State Update map labelling;
+  \State {\relsize{-1}\bfseries If at destination, remove from list}
+  \If {agent requires new route}
+  \State Ask for new route
+  \Comment{e.g. not moving since ...}
+  \EndIf
+  \EndFor
+  \EndWhile
+  \end{algorithmic}
+  \end{alertblock}
+\end{minipage}
+
+\column[t]{.35\linewidth}
+\vspace*{-0.5cm}
+
+\textbf{Adaptive parts:}
+\begin{enumerate}
+\item \beamerbutton{newRouteRequiredForAgent}\\
+  Collecting historical data to decde whether an agent is in \alert{a state} to ask for a new route;\vspace*{.5cm}
+
+\item \beamerbutton{newRouteForAgent}\\
+  Modifying the grid -- including timestamps for conflicting states for the agent -- on which to perform the graph search.
+\end{enumerate}
+\end{columns}
+
+}
+\end{frame}
 
 \end{document}
