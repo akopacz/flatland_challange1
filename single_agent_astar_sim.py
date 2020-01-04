@@ -70,7 +70,7 @@ env_renderer = RenderTool(env, gl="PILSVG",
 
 ######### Get arguments of the script #########
 parser=argparse.ArgumentParser()
-parser.add_argument("-a", type=int,
+parser.add_argument("-agent", type=int,
                     help="id of the agent to be displayed")
 parser.add_argument("-step", type=int,
                     help="steps")
@@ -78,9 +78,9 @@ args = parser.parse_args()
 
 ######### Select agent #########
 show_agents = [2]
-if args.a:
-    show_agents[0] = int(args.a)
-    print(show_agents)
+if args.agent is not None:
+    show_agents[0] = int(args.agent)
+
 
 
 ######### Custom controller setup #########

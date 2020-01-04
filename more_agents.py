@@ -82,7 +82,7 @@ astar_planner = AStarAgent(my_grid, env.rail.width, env.rail.height)
 
 
 ######### Select agents #########
-show_agents = [0, 1]
+show_agents = [ 2, 6]
 
 # stores if agent direction is 0, 1 (or 2, 3) 
 # 1 means True
@@ -131,12 +131,14 @@ for step in range(step):
         ag = env.agents[a_id]
         action = None
         if ag.status == RailAgentStatus.ACTIVE:
-            next_cell = astar_paths_readable[a_id][agent_current_node[a_id]+1].point
-            if ag.position == next_cell:
+            next_cell = None
+            if astar_paths_readable[a_id] is not None:
+                next_cell = astar_paths_readable[a_id][agent_current_node[a_id]+1]
+            if next_cell is None or ag.position == next_cell.point:
                 # check if there is already someone on the route before the next intersection
                 # if entered a new cell decide action
-                # if astar_paths_readable[a_id][agent_current_node[a_id]+1].intersection:
-                if False:
+                if next_cell is None or next_cell.intersection:
+                # if False:
                     # plan route
                     start = Node(ag.position, env.rail.grid[ag.position[0], ag.position[1]], dir=ag.direction)
                     end = Node(ag.target, env.rail.grid[ag.target[0], ag.target[1]])
@@ -146,13 +148,19 @@ for step in range(step):
                         # no route found 
                         # wait
                         action = 4
+                        # next_cell = None
+                    else:
+                        # decide which way to go next
+                        from_ = astar_paths_readable[a_id][0].point
+                        to = astar_paths_readable[a_id][1].point
+                        action = controller.simple_act(from_, ag.direction, to)
                 else:
                     # follow path defined by a*
                     agent_current_node[a_id] += 1
                     # decide which way to go next
                     # from_ = next_cell
                     to = astar_paths_readable[a_id][agent_current_node[a_id] + 1].point
-                    action = controller.simple_act(next_cell, ag.direction, to)
+                    action = controller.simple_act(next_cell.point, ag.direction, to)
             else:
                 # (continue previous movement)
                 # go forward
@@ -166,13 +174,15 @@ for step in range(step):
 
     # update list of cells to avoid
     for a_id in show_agents:
-        astar_planner.remove_cell_from_avoid(env.agents[a_id].position)
+        if env.agents[a_id] == RailAgentStatus.ACTIVE or env.agents[a_id] == RailAgentStatus.DONE:
+            astar_planner.remove_cell_from_avoid(env.agents[a_id].position)
 
     next_obs, all_rewards, done, _ = env.step(action_dict)
 
     # update list of cells to avoid
     for a_id in show_agents:
-        astar_planner.add_cell_to_avoid(env.agents[a_id].position)
+        if env.agents[a_id] == RailAgentStatus.ACTIVE:
+            astar_planner.add_cell_to_avoid(env.agents[a_id].position)
 
     env_renderer.render_env(show=True, show_observations=False, show_predictions=False)
     env_renderer.gl.save_image('../misc/Fames2/flatland_frame_{:04d}.png'.format(step))
