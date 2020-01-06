@@ -21,6 +21,7 @@ class Node:
         self.nbs = transitions
         self.dir = dir
         self.intersection = intersection
+        
     def move_cost(self,other):
         return 1
 
@@ -29,7 +30,7 @@ class Node:
         dir_bit = (3 - self.dir)*4 + to_dir
         mask = 1 << dir_bit
         return self.nbs & mask != 0
-    
+
     def get_direction(self, point):
         return transition_dirs[(self.point[0] - point[0], self.point[1] - point[1])]
 
@@ -39,7 +40,7 @@ class AStarAgent:
         self.width = width
         self.height = height
         self.avoid = []
-            
+
     def children(self, point):
         x,y = point.point
         links = [self.grid[d[0]][d[1]] for d in [(x-1, y),(x,y - 1),(x,y + 1),(x+1,y)] if 0 <= d[0] < self.height and 0 <= d[1] < self.width and d not in self.avoid]
@@ -84,7 +85,7 @@ class AStarAgent:
                     continue
                 #Otherwise if it is already in the open set
                 if node in openset:
-                    #Check if we beat the G score 
+                    #Check if we beat the G score
                     new_g = current.G + current.move_cost(node)
                     if node.G > new_g:
                         #If so, update the node to have a new parent

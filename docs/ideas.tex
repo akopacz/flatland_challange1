@@ -8,11 +8,11 @@
 %
 \mode<presentation>
 {
-  \usetheme{Singapore}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usetheme{Boadilla}      % or try Berlin Singapore Darmstadt, Madrid, Warsaw, ...
   \usecolortheme{crane} % or try albatross, beaver, crane, seahorse ...
   \usefonttheme{professionalfonts}  % or try serif, structurebold, ...
   \setbeamertemplate{blocks}[rounded]%[shadow=true]
-  \useinnertheme[shadow=true]{rounded}
+%  \useinnertheme[shadow=true]{rounded}
 %  \setbeamertemplate{navigation symbols}{}
 %  \setbeamertemplate{caption}[numbered]
 %  \setbeamertemplate{itemize item}{\color{black}$\bullet$}
@@ -50,7 +50,6 @@
 
 \title[Flatland]{
 	\large Ideas for Flatland\\
-	~\\
 	\small Suggestion  for representation
 }
 
@@ -63,7 +62,7 @@
 
 \begin{document}
 
-\frame{\maketitle\vspace*{-3.5cm}\hfill\begin{minipage}{.35\linewidth}%\relsize{-1}
+\frame{\maketitle\vspace*{-3.5cm}\hfill\begin{minipage}{.35\linewidth}\relsize{-1}
   \raggedleft
   Discussions with:\\
   ~\\
@@ -71,7 +70,7 @@
   Levent Kent\\ 
   Anikó Kopacz\\ 
   Gyula Szabó
-\end{minipage}\hspace*{-.5cm}}
+\end{minipage}\hspace*{-.0cm}}
 
 %\begin{frame}
 %  \titlepage
@@ -214,9 +213,9 @@
     }
     \end{minipage}
   };%
-  \begin{scope}[blue,line width=2pt]
-    \draw (concl.west)[->] -- (point_at_1.center);
-    \draw (concl.west)[->] -- (point_at_2.center);
+  \begin{scope}[blue,line width=2pt,bend right]
+    \draw (concl.west)[->] to (point_at_1.center);
+    \draw (concl.west)[->] to (point_at_2.center);
   \end{scope}
 \end{tikzpicture}
 
@@ -339,10 +338,11 @@
 \begin{columns}
 
 \column[t]{.67\linewidth}
-\vspace*{-0cm}
+\vspace*{-0.7cm}
 \begin{minipage}{\linewidth}
   \begin{alertblock}{Multiagent adaptive control}
   \begin{algorithmic}[1]
+  \Statex
   \State Compute shortest paths for \alert{all agents};
   %  \Statex
   \While{$\mathrm{AgentList} \not= \emptyset$}
