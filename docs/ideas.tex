@@ -250,26 +250,29 @@
 \begin{frame}[fragile,t]
   \frametitle{Algorithm}
 
+\vspace*{-.5cm}
 \hfill
 \begin{minipage}{.8\linewidth}
   \begin{alertblock}{Multiagent control algorithm}
   \begin{algorithmic}[1]
   \Statex
-  \While{$\mathrm{AgentList} \not= \emptyset$}
-  \State Label the map using the actual problem state
-  \Statex \Comment {{\relsize{-1} One must consider the \alert{grid} and the \alert{agent positions}}}
   \State Compute shortest path and establish the order of agents
-  \Statex
-  \State Perform the moves using the order of agents
-  \Statex
-  \Comment {{\relsize{-1} Perform moves according to the established order}}
-  \Statex
-  \Comment {{\relsize{-1} Avoid stepping on forbidden states}}
+  \Statex \Comment{{\relsize{-1} Initialize $\mathrm{AgentList}$ -- for ordering}}
+  \State Label the map considering the agent positions
+  \Statex \Comment {{\relsize{-1} One must consider the \alert{grid} and the \alert{agent positions}}}
+  \While{$\mathrm{AgentList} \not= \emptyset$}
+  \For{agent $\leftarrow\mathrm{AgentList}$}
+    \State (attempt to) move agent
+    \Statex \Comment {{\relsize{-1} if position locked for opposing direction, \alert{request re-planning}}}
+    \State Update occupancy map
+    \Comment {{\relsize{-1} \alert{NO} stepping on forbidden states}}
+  \EndFor  
   \State {\relsize{-1}\bfseries If agent at destination, remove it from list}
   \EndWhile
   \end{algorithmic}
   \end{alertblock}
 \end{minipage}
+%   \Statex
 
 \end{frame}
 
@@ -368,7 +371,7 @@
 \textbf{Adaptive parts:}
 \begin{enumerate}
 \item \beamerbutton{newRouteRequiredForAgent}\\
-  Collecting historical data to decde whether an agent is in \alert{a state} to ask for a new route;\vspace*{.5cm}
+  Collecting historical data to decide whether an agent is in \alert{a state} to ask for a new route;\vspace*{.5cm}
 
 \item \beamerbutton{newRouteForAgent}\\
   Modifying the grid -- including timestamps for conflicting states for the agent -- on which to perform the graph search.
@@ -376,6 +379,36 @@
 \end{columns}
 
 }
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Conclusions}
+
+An agent requires re-planning if:
+\begin{itemize}
+\item Ahead of a bifurcation (splitting) and
+  \begin{itemize}
+  \item the continuation is labelled busy in the opposing direction, \alert{or}
+  \item there is a train behind that is obstructed  by the current agent.
+  \end{itemize}
+
+\end{itemize}
+
+\vfill
+
+\alert{Expected arrival times} -- $\mathrm{time}_{a}$ -- for agents need re-computing at \alert{each iteration}:
+\begin{itemize}
+\item if agent moves according to its planned route, then $\mathrm{time}_{a}$ is decreased by \alert{one}.
+\item if agent requested re-planning, and could move on the route, then time is updated according to the new route.
+\item if agent could not move -- in spite of re-planning -- them $\mathrm{time}_{a}=\infty$
+\end{itemize}
+
+\vfill
+
+\begin{block}{}
+\alert{The re-ordering} of agents has to take place at the end of iterations.
+\end{block}
+
 \end{frame}
 
 \end{document}
