@@ -12,6 +12,7 @@
   \usecolortheme{crane} % or try albatross, beaver, crane, seahorse ...
   \usefonttheme{professionalfonts}  % or try serif, structurebold, ...
   \setbeamertemplate{blocks}[rounded]%[shadow=true]
+  \setbeamerfont{block title}{size={}}
 %  \useinnertheme[shadow=true]{rounded}
 %  \setbeamertemplate{navigation symbols}{}
 %  \setbeamertemplate{caption}[numbered]
@@ -22,6 +23,8 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{amssymb,amsmath,relsize}
 \usepackage{algpseudocode}
+\algrenewcommand{\alglinenumber}[1]{\relsize{-2} \textsl{#1.}}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill\(\triangleright\)\ {\smaller{#1}}}%
 %\usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
 \usepackage{tikz}
 \usetikzlibrary{shapes,positioning,math,calc}
@@ -131,7 +134,7 @@
       below right=2.5cm of current page.north,
       fill=title.bg!60!white,
       fill opacity=.4]%
-  { \begin{minipage}{.85\linewidth}
+  { \begin{minipage}{.8\linewidth}
     \textbf{Facts:}\\
      Given the current position for each agent, there are locations that \alert{will cause deadlock} if occupied by an other agent.
     \vspace*{.3cm}
@@ -186,7 +189,7 @@
       below right=2.5cm of current page.north,
       fill=title.bg!60!white,
       fill opacity=.4]%
-  { \begin{minipage}{.85\linewidth}
+  { \begin{minipage}{.8\linewidth}
     \textbf{Several agents using the same network:}\\
      When the agent is \emph{expected to reach} that position, it could be at a conflicting state with other agents.
     \vspace*{.5cm}
@@ -215,7 +218,7 @@
   };%
   \begin{scope}[blue,line width=2pt,bend right]
     \draw (concl.west)[->] to (point_at_1.center);
-    \draw (concl.west)[->] to (point_at_2.center);
+    \draw (concl.west)[->] to  (point_at_2.center);
   \end{scope}
 \end{tikzpicture}
 
@@ -256,16 +259,16 @@
   \begin{alertblock}{Multiagent control algorithm}
   \begin{algorithmic}[1]
   \Statex
-  \State Compute shortest path and establish the order of agents
-  \Statex \Comment{{\relsize{-1} Initialize $\mathrm{AgentList}$ -- for ordering}}
-  \State Label the map considering the agent positions
-  \Statex \Comment {{\relsize{-1} One must consider the \alert{grid} and the \alert{agent positions}}}
+  \State Compute shortest paths
+  \State Initialize $\mathrm{AgentList}$ -- for ordering
+  \State Compute the \alert{occupancy} map
+  \Statex \Comment {{\relsize{-1} Using the \alert{grid} and \alert{agent positions}}}
   \While{$\mathrm{AgentList} \not= \emptyset$}
   \For{agent $\leftarrow\mathrm{AgentList}$}
     \State (attempt to) move agent
     \Statex \Comment {{\relsize{-1} if position locked for opposing direction, \alert{request re-planning}}}
     \State Update occupancy map
-    \Comment {{\relsize{-1} \alert{NO} stepping on forbidden states}}
+    \Comment {{\relsize{-1} \alert{NO} stepping onto forbidden positions}}
   \EndFor  
   \State {\relsize{-1}\bfseries If agent at destination, remove it from list}
   \EndWhile
@@ -345,20 +348,20 @@
 \begin{minipage}{\linewidth}
   \begin{alertblock}{Multiagent adaptive control}
   \begin{algorithmic}[1]
-  \Statex
   \State Compute shortest paths for \alert{all agents};
+  \State Initialize $\mathrm{AgentList}$ \Comment{for serialising actions}
+  \State Label the map by propagating agent movements;
   %  \Statex
   \While{$\mathrm{AgentList} \not= \emptyset$}
-  \State Label the map by propagating agent movements;
-  \State Establish agent ordering;
-  \For {each agent in succession order}
-  \State Perform the move if not in conflict;
-  \State Update map labelling;
-  \State {\relsize{-1}\bfseries If at destination, remove from list}
-  \If {agent requires new route}
+  \For {agent $\in \mathrm{AgentList}$} \Comment{order is important}
+  \If{agent \alert{canMove}}
+  \State Perform the move;
+  \Else   \Comment{ e.g. not moving / being obstructive}
   \State Ask for new route
-  \Comment{e.g. not moving since ...}
   \EndIf
+  \State Update map labelling;
+%  \Statex
+  \State {{\relsize{-1} \textbf{If} agent \alert{atDestination}	then \alert{removeFrom}$\mathrm{AgentList}$}}
   \EndFor
   \EndWhile
   \end{algorithmic}
@@ -386,6 +389,7 @@
 
 An agent requires re-planning if:
 \begin{itemize}
+\item No route is available $\Leftrightarrow \mathrm{time}_a=\infty$;
 \item Ahead of a bifurcation (splitting) and
   \begin{itemize}
   \item the continuation is labelled busy in the opposing direction, \alert{or}
