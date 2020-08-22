@@ -1,5 +1,5 @@
-\documentclass{beamer}
-%
+\documentclass[12pt,aspectratio=169]{beamer}
+% 
 
 % Choose how your presentation looks.
 %
@@ -8,11 +8,12 @@
 %
 \mode<presentation>
 {
-  \usetheme{Singapore}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usetheme{Boadilla}      % or try Berlin Singapore Darmstadt, Madrid, Warsaw, ...
   \usecolortheme{crane} % or try albatross, beaver, crane, seahorse ...
   \usefonttheme{professionalfonts}  % or try serif, structurebold, ...
   \setbeamertemplate{blocks}[rounded]%[shadow=true]
-  \useinnertheme[shadow=true]{rounded}
+  \setbeamerfont{block title}{size={}}
+%  \useinnertheme[shadow=true]{rounded}
 %  \setbeamertemplate{navigation symbols}{}
 %  \setbeamertemplate{caption}[numbered]
 %  \setbeamertemplate{itemize item}{\color{black}$\bullet$}
@@ -22,7 +23,9 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{amssymb,amsmath,relsize}
 \usepackage{algpseudocode}
-\usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
+\algrenewcommand{\alglinenumber}[1]{\relsize{-2} \textsl{#1.}}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill\(\triangleright\)\ {\smaller{#1}}}%
+%\usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
 \usepackage{tikz}
 \usetikzlibrary{shapes,positioning,math,calc}
 
@@ -50,26 +53,34 @@
 
 \title[Flatland]{
 	\large Ideas for Flatland\\
-	~\\
 	\small Suggestion  for representation
 }
 
-\author{
-Lehel CSATÓ}
-\institute[UBB]{\relsize{1}
-  Faculty of Mathematics and Informatics \newline
+\author{Lehel Csató}
+\institute[UBB]{%\relsize{-1}
+  Faculty of Mathematics and Informatics,\\
   Babe\c{s}--Bolyai University of Cluj-Napoca
 }
 
+
 \begin{document}
 
-\frame{\maketitle}
+\frame{\maketitle\vspace*{-3.5cm}\hfill\begin{minipage}{.35\linewidth}\relsize{-1}
+  \raggedleft
+  Discussions with:\\
+  ~\\
+  Hunor Jakab\\
+  Levent Kent\\ 
+  Anikó Kopacz\\ 
+  Gyula Szabó
+\end{minipage}\hspace*{-.0cm}}
 
 %\begin{frame}
 %  \titlepage
 %\end{frame}
 
-\begin{frame}[t]{Agent actions}
+\begin{frame}[t]
+  \frametitle{Agent actions}
 
 
 \begin{itemize}
@@ -81,13 +92,13 @@ Lehel CSATÓ}
   \begin{enumerate}
   \item One must label the \alert{map}: 
     \begin{itemize}
-    \item Identify portions locked by the agents present within the system;
-    \item Identify \emph{likelihood} of a cell being occupied at a given time -- relative to \emph{present}.
+    \item Identify regions locked by agents;
+    \item (if needed) identify \emph{likelihood} of cells being occupied at a future time.
     \end{itemize}
 \vfill
-  \item Calculate -- using graph search in a labelled graph -- the shortest times to destination.
+  \item Calculate the shortest times to destination on the \alert{labelled grid}.
 \vfill
-  \item Prioritize the agents -- suggested prioritization criterion is the \alert{expected shortest arrival} to the destination.
+  \item Prioritize the agents according to the \alert{expected arrival to destination}.
   \end{enumerate}
 
 \end{itemize}
@@ -98,7 +109,7 @@ Lehel CSATÓ}
 \vspace*{-0cm}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[t]
   \frametitle{Labelling the map \quad I}
 
 % PGF and latex cannot work with multiple images within a GIF.
@@ -108,11 +119,11 @@ Lehel CSATÓ}
 %   2. choose the resulting PNG (or more) to include in latex
 %
 \begin{tikzpicture}[remember picture,overlay,onslide={<2->{semitransparent}}]%
-  \node (fl_im) [below=2cm of current page.north]%
+  \node (fl_im) [below=1.5cm of current page.north]%
   { \pgfimage[width=\linewidth]{images/fl1-5_annotated}
   };%
-  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ );
-  \coordinate (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$);
+  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,1.1cm)$ );
+  \coordinate (point_at_2) at ( $(fl_im.center) + (-1.9cm,-2.5cm)$);
 \end{tikzpicture}
 
 \only<2->{
@@ -123,7 +134,7 @@ Lehel CSATÓ}
       below right=2.5cm of current page.north,
       fill=title.bg!60!white,
       fill opacity=.4]%
-  { \begin{minipage}{.85\linewidth}
+  { \begin{minipage}{.8\linewidth}
     \textbf{Facts:}\\
      Given the current position for each agent, there are locations that \alert{will cause deadlock} if occupied by an other agent.
     \vspace*{.3cm}
@@ -139,20 +150,21 @@ Lehel CSATÓ}
     \end{alertblock}
     \vspace*{1cm}
     \visible<3->{%
-      \textbf{Note:}\\
-      Instead of $A^*$, one might use other graph search algorithms.
+      \begin{block}{Note:}
+      Instead of $A^*$ we could use other graph search methods.
+      \end{block}
     }
     \end{minipage}
   };%
   \begin{scope}[blue,line width=2pt,bend right]
-    \draw (concl.north west)[->] to (point_at_1.center);
-    \draw (concl.north west)[->] to (point_at_2.center);
+    \draw (concl.west)[->] to (point_at_1.center);
+    \draw (concl.west)[->] to (point_at_2.center);
   \end{scope}
 \end{tikzpicture}
 }
 \end{frame}
 
-\begin{frame}
+\begin{frame}[t]
   \frametitle{Labelling the map \quad II}
 
 % PGF and latex cannot work with multiple images within a GIF.
@@ -163,11 +175,11 @@ Lehel CSATÓ}
 %
 % if one wishes to change a TIKZ attribute: onslide={<2->{semitransparent}}
 \begin{tikzpicture}[remember picture,overlay,semitransparent]%
-  \node (fl_im) [below=2.5cm of current page.north]%
+  \node (fl_im) [below=1.5cm of current page.north]%
   { \pgfimage[width=\linewidth]{images/fl1-1}
   };%
-  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,.83cm)$ );
-  \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-1.9cm)$ ) {.};
+  \coordinate (point_at_1) at ( $(fl_im.center) + (-1.9cm,1.1cm)$ );
+  \node (point_at_2) at ( $(fl_im.center) + (-1.9cm,-2.5cm)$ ) {.};
 \end{tikzpicture}
 
 \begin{tikzpicture}[remember picture,overlay,>=latex]%
@@ -177,7 +189,7 @@ Lehel CSATÓ}
       below right=2.5cm of current page.north,
       fill=title.bg!60!white,
       fill opacity=.4]%
-  { \begin{minipage}{.85\linewidth}
+  { \begin{minipage}{.8\linewidth}
     \textbf{Several agents using the same network:}\\
      When the agent is \emph{expected to reach} that position, it could be at a conflicting state with other agents.
     \vspace*{.5cm}
@@ -204,11 +216,202 @@ Lehel CSATÓ}
     }
     \end{minipage}
   };%
-  \begin{scope}[blue,line width=2pt]
-    \draw (concl.west)[->] -- (point_at_1.center);
-    \draw (concl.west)[->] -- (point_at_2.center);
+  \begin{scope}[blue,line width=2pt,bend right]
+    \draw (concl.west)[->] to (point_at_1.center);
+    \draw (concl.west)[->] to  (point_at_2.center);
   \end{scope}
 \end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle{Shortest path calculation}
+
+\begin{enumerate}
+\item If alone, then the $A^*$ algorithm is optimal;
+\vfill
+\item If multiple agents are present, a solution is to:
+  \begin{itemize}
+  \item estimate the arrival times -- disregarding \alert{other agent positions}.\\
+  \hfill These estimates take into account labelling (blocked positions);\\
+  \hfill Sugg: if route blocked -- e.g. within $2$ steps -- then $t=\infty$.\\
+  \hfill Will serve for agent ordering.
+  \end{itemize}
+\vfill
+\item If an agent cannot move -- i.e. it is broken -- then $t=\infty$.
+\end{enumerate}
+
+\vfill
+\vfill
+
+\begin{block}{No obstruction rule}
+  None of the agents can step onto a position that is labelled as conflicting.
+\end{block}
+
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Algorithm}
+
+\vspace*{-.5cm}
+\hfill
+\begin{minipage}{.8\linewidth}
+  \begin{alertblock}{Multiagent control algorithm}
+  \begin{algorithmic}[1]
+  \Statex
+  \State Compute shortest paths
+  \State Initialize $\mathrm{AgentList}$ -- for ordering
+  \State Compute the \alert{occupancy} map
+  \Statex \Comment {{\relsize{-1} Using the \alert{grid} and \alert{agent positions}}}
+  \While{$\mathrm{AgentList} \not= \emptyset$}
+  \For{agent $\leftarrow\mathrm{AgentList}$}
+    \State (attempt to) move agent
+    \Statex \Comment {{\relsize{-1} if position locked for opposing direction, \alert{request re-planning}}}
+    \State Update occupancy map
+    \Comment {{\relsize{-1} \alert{NO} stepping onto forbidden positions}}
+  \EndFor  
+  \State {\relsize{-1}\bfseries If agent at destination, remove it from list}
+  \EndWhile
+  \end{algorithmic}
+  \end{alertblock}
+\end{minipage}
+%   \Statex
+
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle{Conclusions arising from the controlling algorithm}
+
+  \vspace*{-.4cm}\hfill
+  \begin{minipage}{.4\linewidth}
+  \begin{block}{Goal is to \alert{avoid deadlocks}}
+  \end{block}
+  \end{minipage}
+
+  \vfill
+  \textbf{Any agent:}
+  \begin{itemize}
+  \item \alert{Should move} if it \alert{\bfseries can} -- i.e. it is not broken or lead to possible conflict;
+  \vfill
+  \item \alert{If it moves}, then the observation map \alert{is updated};
+  \end{itemize}
+  
+  \vfill
+  \vfill
+
+\textbf{Conclusions regarding action space:}
+
+\begin{itemize}
+  \vfill
+  \item No need to decide for agent movement: if permitted, it \alert{always} moves.
+  \vfill
+  \item The movement is always \alert{along the scheduled path}.
+  \vfill
+  \item Decision required as to the path needs updating or not.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle{Conclusion regarding agent/state representation}
+
+\textbf{Problem representation:}
+\begin{itemize}
+\item There is a \alert{scheduler} -- from which the agents get their route plan.
+\item Each agent -- if it can -- moves.
+  Therefore, each movement is affected by
+  \begin{itemize}
+  \item the \alert{global ordering} of each agent;
+  \item the established schedule -- timetable.
+  \end{itemize}
+\end{itemize}
+
+\vfill
+\begin{alertblock}{Places for problem adaptation:}
+  \alert{ANN-s needed} to adaptively:
+  \begin{itemize}
+  \item Decide time and circumstances \alert{of re-scheduling} an agent;
+  \item Propose \alert{alternative routes} -- how to \alert{modify the grid}.
+  \end{itemize}
+\end{alertblock}
+
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Frame for an adaptive algorithm}
+
+{\relsize{-1}
+\begin{columns}
+
+\column[t]{.67\linewidth}
+\vspace*{-0.7cm}
+\begin{minipage}{\linewidth}
+  \begin{alertblock}{Multiagent adaptive control}
+  \begin{algorithmic}[1]
+  \State Compute shortest paths for \alert{all agents};
+  \State Initialize $\mathrm{AgentList}$ \Comment{for serialising actions}
+  \State Label the map by propagating agent movements;
+  %  \Statex
+  \While{$\mathrm{AgentList} \not= \emptyset$}
+  \For {agent $\in \mathrm{AgentList}$} \Comment{order is important}
+  \If{agent \alert{canMove}}
+  \State Perform the move;
+  \Else   \Comment{ e.g. not moving / being obstructive}
+  \State Ask for new route
+  \EndIf
+  \State Update map labelling;
+%  \Statex
+  \State {{\relsize{-1} \textbf{If} agent \alert{atDestination}	then \alert{removeFrom}$\mathrm{AgentList}$}}
+  \EndFor
+  \EndWhile
+  \end{algorithmic}
+  \end{alertblock}
+\end{minipage}
+
+\column[t]{.35\linewidth}
+\vspace*{-0.5cm}
+
+\textbf{Adaptive parts:}
+\begin{enumerate}
+\item \beamerbutton{newRouteRequiredForAgent}\\
+  Collecting historical data to decide whether an agent is in \alert{a state} to ask for a new route;\vspace*{.5cm}
+
+\item \beamerbutton{newRouteForAgent}\\
+  Modifying the grid -- including timestamps for conflicting states for the agent -- on which to perform the graph search.
+\end{enumerate}
+\end{columns}
+
+}
+\end{frame}
+
+\begin{frame}[fragile,t]
+  \frametitle{Conclusions}
+
+An agent requires re-planning if:
+\begin{itemize}
+\item No route is available $\Leftrightarrow \mathrm{time}_a=\infty$;
+\item Ahead of a bifurcation (splitting) and
+  \begin{itemize}
+  \item the continuation is labelled busy in the opposing direction, \alert{or}
+  \item there is a train behind that is obstructed  by the current agent.
+  \end{itemize}
+
+\end{itemize}
+
+\vfill
+
+\alert{Expected arrival times} -- $\mathrm{time}_{a}$ -- for agents need re-computing at \alert{each iteration}:
+\begin{itemize}
+\item if agent moves according to its planned route, then $\mathrm{time}_{a}$ is decreased by \alert{one}.
+\item if agent requested re-planning, and could move on the route, then time is updated according to the new route.
+\item if agent could not move -- in spite of re-planning -- them $\mathrm{time}_{a}=\infty$
+\end{itemize}
+
+\vfill
+
+\begin{block}{}
+\alert{The re-ordering} of agents has to take place at the end of iterations.
+\end{block}
 
 \end{frame}
 

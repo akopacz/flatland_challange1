@@ -24,10 +24,10 @@ class Node:
         self.nbs = int(transitions)
         self.dir = dir
         self.intersection = intersection
-        self.move_cost = 1
+        # self.move_cost = 1
 
-    # def move_cost(self,other):
-    #     return 1
+    def move_cost(self,other):
+        return 1
 
     def is_connected_to(self, cell):
         to_dir = transform_to_bit_dict[(-self.point[0] + cell[0], - self.point[1] + cell[1])]
@@ -112,8 +112,8 @@ class AStarAgent:
                     continue
                 #Otherwise if it is already in the open set
                 if node in openset:
-                    #Check if we beat the G score 
-                    new_g = current.G + current.move_cost
+                    #Check if we beat the G score
+                    new_g = current.G + current.move_cost(node)
                     if node.G > new_g:
                         #If so, update the node to have a new parent
                         node.G = new_g
