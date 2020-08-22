@@ -7,14 +7,7 @@ class GreedyAgent:
         self.state_size = state_size
         self.action_size = action_size
 
-    def act(self, state):
-        """
-        :param state: input is the observation of the agent
-        :return: returns an action
-        """
-        return np.random.choice([RailEnvActions.MOVE_FORWARD, RailEnvActions.MOVE_RIGHT, RailEnvActions.MOVE_LEFT,
-                                 RailEnvActions.STOP_MOVING])
-    
+  
     def simple_act(self, p0, dir, p1):
         diff_0 = p1[0] - p0[0]
         diff_1 = p1[1] - p0[1]
@@ -31,11 +24,6 @@ class GreedyAgent:
         if diff_1 < 0:
             # West
             new_dir = 3
-        # return action % 4
-        # if abs(diff - dir) < 2:
-        #     return 2 + diff - dir
-        # else:
-        #     return 4
         return self.change_dir_from_to(dir, new_dir)
 
     def change_dir_from_to(self, from_dir, to_dir):
