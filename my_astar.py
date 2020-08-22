@@ -15,7 +15,7 @@ transition_dirs = {
 }
 
 class Node:
-    def __init__(self, point, transitions, dir=None, intersection=False, starting_timestamp=0):
+    def __init__(self, point, transitions, dir=None, intersection=False, starting_timestamp=0, speed=1.0):
         self.point = point
         self.parent = None
         self.H = 0
@@ -24,10 +24,10 @@ class Node:
         self.nbs = int(transitions)
         self.dir = dir
         self.intersection = intersection
-        # self.move_cost = 1
+        self.move_cost = speed
 
     def move_cost(self,other=None):
-        return 1
+        return self.move_cost
 
     def is_connected_to(self, cell):
         to_dir = transform_to_bit_dict[(-self.point[0] + cell[0], - self.point[1] + cell[1])]
@@ -66,9 +66,8 @@ class AStarAgent:
                 print(link.point)
         return [link for link in links if abs(self.last_visited[link.point[0], link.point[1], 0] - t_stamp) > 2 or self.last_visited[link.point[0], link.point[1], 1] == agent_id]
     
-    def children(self, point, agent_id):
-        
-        res = self.get_neighbors(point, agent_id, t_stamp=point.timestamp + point.move_cost())
+    def children(self, point, agent_id, move_cost):
+        res = self.get_neighbors(point, agent_id, t_stamp=point.timestamp + move_cost)
         is_i = len(res) > 1
         for n in res:
             n.dir = point.get_direction(n.point)
@@ -78,7 +77,8 @@ class AStarAgent:
     def manhattan(self, point, point2):
         return abs(point.point[0] - point2.point[0]) + abs(point.point[1]-point2.point[1])
 
-    def aStar(self, start, goal, agent_id):
+    def aStar(self, start, goal, agent_id, agent_speed=1.0):
+        move_cost = int(1/agent_speed)
         #The open and closed sets
         openset = set()
         closedset = set()
@@ -106,25 +106,29 @@ class AStarAgent:
             #Add it to the closed set
             closedset.add(current)
             #Loop through the node's children/siblings
-            for node in self.children(current, agent_id):
+            for node in self.children(current, agent_id, move_cost):
                 #If it is already in the closed set, skip it
                 if node in closedset:
                     continue
                 #Otherwise if it is already in the open set
                 if node in openset:
                     #Check if we beat the G score
-                    new_g = current.G + current.move_cost(node)
+                    # new_g = current.G + current.move_cost(node)
+                    new_g = current.G + move_cost
                     if node.G > new_g:
                         #If so, update the node to have a new parent
                         node.G = new_g
                         node.parent = current
-                        node.timestamp = current.timestamp + current.move_cost( )
+                        # node.timestamp = current.timestamp + current.move_cost( )
+                        node.timestamp = current.timestamp + move_cost
                         node.dir = transition_dirs[current.point[0] - node.point[0], current.point[1] - node.point[1]]
                 else:
                     #If it isn't in the open set, calculate the G and H score for the node
-                    node.G = current.G + current.move_cost()
+                    # node.G = current.G + current.move_cost()
+                    node.G = current.G + move_cost
                     node.H = self.manhattan(node, goal)
-                    node.timestamp = current.timestamp + current.move_cost()
+                    # node.timestamp = current.timestamp + current.move_cost()
+                    node.timestamp = current.timestamp + move_cost
 
                     node.dir = transition_dirs[current.point[0] - node.point[0], current.point[1] - node.point[1]]
                     #Set the parent to our current item

@@ -75,7 +75,7 @@ class CustomObservationBuilder(ObservationBuilder):
         direction = agent.direction
         initial_position = agent.initial_position
         target = agent.target
-
+        speed = agent.speed_data["speed"]
         
         """
         You can also optionally access the states of the rest of the agents by 
@@ -97,5 +97,5 @@ class CustomObservationBuilder(ObservationBuilder):
 
             ## Do something nice here if you wish
         """
-        return self.rail_obs, (status, position, direction, initial_position, target)
+        return self.rail_obs, (status, position, direction, initial_position, target, speed)
 

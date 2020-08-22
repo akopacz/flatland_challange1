@@ -91,7 +91,7 @@ def my_controller(obs, number_of_agents, astar_paths_readable, timestamp):
 
     # Chose an action for each agent in the environment
     for a_id in range(number_of_agents):
-        status, position, direction, initial_position, target = obs[a_id][1]
+        status, position, direction, initial_position, target, speed = obs[a_id][1]
         action = None
         if status == RailAgentStatus.ACTIVE:
             next_cell = None
@@ -105,7 +105,7 @@ def my_controller(obs, number_of_agents, astar_paths_readable, timestamp):
                     # plan route
                     start = Node(position, grid[position[0], position[1]], dir=direction, starting_timestamp=timestamp)
                     end = Node(target, grid[target[0], target[1]])
-                    astar_paths_readable[a_id] = astar_planner.aStar(start, end, a_id)
+                    astar_paths_readable[a_id] = astar_planner.aStar(start, end, a_id, speed)
                     agent_current_node[a_id] = 0
                     if astar_paths_readable[a_id] is None:
                         # no route found 
