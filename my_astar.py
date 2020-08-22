@@ -26,7 +26,7 @@ class Node:
         self.intersection = intersection
         # self.move_cost = 1
 
-    def move_cost(self,other):
+    def move_cost(self,other=None):
         return 1
 
     def is_connected_to(self, cell):
@@ -68,7 +68,7 @@ class AStarAgent:
     
     def children(self, point, agent_id):
         
-        res = self.get_neighbors(point, agent_id, t_stamp=point.timestamp + point.move_cost)
+        res = self.get_neighbors(point, agent_id, t_stamp=point.timestamp + point.move_cost())
         is_i = len(res) > 1
         for n in res:
             n.dir = point.get_direction(n.point)
@@ -118,13 +118,13 @@ class AStarAgent:
                         #If so, update the node to have a new parent
                         node.G = new_g
                         node.parent = current
-                        node.timestamp = current.timestamp + current.move_cost
+                        node.timestamp = current.timestamp + current.move_cost( )
                         node.dir = transition_dirs[current.point[0] - node.point[0], current.point[1] - node.point[1]]
                 else:
                     #If it isn't in the open set, calculate the G and H score for the node
-                    node.G = current.G + current.move_cost
+                    node.G = current.G + current.move_cost()
                     node.H = self.manhattan(node, goal)
-                    node.timestamp = current.timestamp + current.move_cost
+                    node.timestamp = current.timestamp + current.move_cost()
 
                     node.dir = transition_dirs[current.point[0] - node.point[0], current.point[1] - node.point[1]]
                     #Set the parent to our current item
